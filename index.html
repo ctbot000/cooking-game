@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Skillet Rush — a cooking game</title>
+<meta name="description" content="Read the tickets, build the dish, ride the heat band. A short, sharp cooking game that runs in your browser.">
+<meta name="theme-color" content="#16110f">
+<meta property="og:title" content="Skillet Rush">
+<meta property="og:description" content="Read the tickets, build the dish, ride the heat band.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%B3%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#shelf">Skip to the ingredient shelf</a>
+
+<main class="app" id="app">
+
+  <header class="hud">
+    <h1 class="brand"><span class="brand-mark" aria-hidden="true">🍳</span><span class="brand-text">Skillet&nbsp;Rush</span></h1>
+    <div class="gauges">
+      <div class="gauge"><span class="gauge-label">Day</span><strong id="hud-day">1</strong></div>
+      <div class="gauge"><span class="gauge-label">Score</span><strong id="hud-score">0</strong></div>
+      <div class="gauge"><span class="gauge-label">Combo</span><strong id="hud-combo">—</strong></div>
+      <div class="gauge gauge-lives">
+        <span class="gauge-label">Patience</span>
+        <strong id="hud-lives" aria-label="Lives remaining">♥♥♥</strong>
+      </div>
+    </div>
+    <div class="hud-tools">
+      <button type="button" class="icon-btn" id="btn-sound" aria-pressed="true" title="Sound (M)">🔊</button>
+      <button type="button" class="icon-btn" id="btn-pause" title="Pause (Esc)">⏸</button>
+    </div>
+  </header>
+
+  <section class="rail-wrap" aria-label="Waiting orders">
+    <ol class="rail" id="rail"></ol>
+    <p class="rail-empty" id="rail-empty">No orders yet — the door is about to swing.</p>
+  </section>
+
+  <section class="line">
+    <div class="panel pan-panel">
+      <h2 class="panel-title">The&nbsp;pan</h2>
+      <div class="pan" id="pan">
+        <ul class="pan-items" id="pan-items" aria-label="Ingredients in the pan"></ul>
+        <p class="pan-hint" id="pan-status">Pick ingredients to start a dish</p>
+        <div class="toasts" id="toasts" aria-hidden="true"></div>
+      </div>
+      <div class="pan-actions">
+        <p class="pass" id="pass" hidden></p>
+        <button type="button" class="ghost-btn" id="btn-trash">Clear pan <kbd>⌫</kbd></button>
+      </div>
+    </div>
+
+    <div class="panel stove-panel">
+      <h2 class="panel-title">Heat</h2>
+      <div class="dial" id="dial" role="img" aria-label="Heat dial">
+        <div class="dial-track">
+          <div class="dial-band" id="dial-band"></div>
+          <div class="dial-needle" id="dial-needle"></div>
+        </div>
+        <div class="dial-scale"><span>cold</span><span>scorching</span></div>
+      </div>
+
+      <div class="meters">
+        <div class="meter meter-sear">
+          <span class="meter-label">Sear</span>
+          <div class="meter-track"><div class="meter-fill" id="meter-sear"></div></div>
+        </div>
+        <div class="meter meter-burn">
+          <span class="meter-label">Char</span>
+          <div class="meter-track"><div class="meter-fill" id="meter-burn"></div></div>
+        </div>
+      </div>
+
+      <button type="button" class="cook-btn" id="btn-cook" disabled>
+        <span class="cook-btn-main">Hold to heat</span>
+        <span class="cook-btn-sub">hold <kbd>Space</kbd> or press here</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="shelf-wrap" aria-labelledby="shelf-title">
+    <h2 class="panel-title" id="shelf-title">Shelf</h2>
+    <ul class="shelf" id="shelf"></ul>
+  </section>
+
+  <p class="footnote">
+    Build what the tickets ask for, then ride the needle inside the green band.
+    Too hot and it chars; too slow and they leave.
+  </p>
+</main>
+
+<p class="visually-hidden" id="announcer" role="status" aria-live="polite"></p>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+    <h2 id="overlay-title">Skillet Rush</h2>
+    <div class="card-body" id="overlay-body"></div>
+    <button type="button" class="primary-btn" id="overlay-action">Start service</button>
+    <p class="card-foot" id="overlay-foot"></p>
+  </div>
+</div>
+
+<script type="module" src="src/ui.js"></script>
+<noscript>
+  <p style="padding:2rem;color:#f0e6dd;font:16px system-ui">Skillet Rush needs JavaScript to run.</p>
+</noscript>
+</body>
+</html>

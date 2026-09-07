@@ -1,0 +1,5 @@
+# Local agent state — never part of the project.
+.claude/
+
+# Node, if anyone adds tooling later.
+node_modules/

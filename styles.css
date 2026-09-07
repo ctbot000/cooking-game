@@ -1,0 +1,649 @@
+/* Skillet Rush — a warm, dim kitchen at the height of service. */
+
+:root {
+  color-scheme: dark;
+
+  --ink: #f6ece2;
+  --ink-dim: #b9a596;
+  --ink-faint: #7d6b5f;
+
+  --bg: #16110f;
+  --bg-grain: #1d1614;
+  --panel: #241b18;
+  --panel-hi: #2e2320;
+  --edge: #3a2c26;
+
+  --amber: #f0a04b;
+  --amber-deep: #c9761f;
+  --ember: #ef5b47;
+  --char: #8d4a3a;
+  --mint: #6cc48f;
+  --steel: #79a6bd;
+
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 10px 30px rgb(0 0 0 / 45%);
+  --tap: 0 2px 0 rgb(0 0 0 / 40%);
+}
+
+/* `hidden` is only a UA stylesheet rule, so any author `display` beats it.
+   This keeps the attribute authoritative wherever it is used below. */
+[hidden] { display: none !important; }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(120% 80% at 50% -10%, #2a1e19 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg-grain), var(--bg) 60%);
+  color: var(--ink);
+  font: 15px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+kbd {
+  font: inherit;
+  font-size: 0.82em;
+  padding: 0.05em 0.4em;
+  border: 1px solid var(--edge);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: #1b1412;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+  z-index: 20;
+  padding: 0.6rem 1rem;
+  background: var(--amber);
+  color: #221;
+  border-radius: 0 0 var(--radius-sm) 0;
+}
+.skip:focus { left: 0; top: 0; }
+
+/* ---------------------------------------------------------------- layout */
+
+.app {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: clamp(0.6rem, 2vw, 1.2rem);
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  display: grid;
+  gap: clamp(0.6rem, 1.6vw, 1rem);
+}
+
+.panel {
+  background: linear-gradient(180deg, var(--panel-hi), var(--panel));
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  padding: clamp(0.7rem, 1.6vw, 1rem);
+  box-shadow: var(--shadow);
+}
+
+.panel-title {
+  margin: 0 0 0.6rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------------- hud */
+
+.hud {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.brand {
+  margin: 0;
+  font-size: clamp(1.05rem, 3.2vw, 1.4rem);
+  letter-spacing: -0.01em;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.brand-mark { font-size: 1.15em; filter: drop-shadow(0 2px 6px rgb(240 160 75 / 35%)); }
+
+.gauges {
+  display: flex;
+  gap: clamp(0.5rem, 2vw, 1.1rem);
+  margin-left: auto;
+  align-items: stretch;
+}
+
+.gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 3.4rem;
+  padding: 0.25rem 0.5rem;
+  background: #1d1613;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-sm);
+}
+.gauge-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.gauge strong {
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+.gauge-lives strong { color: var(--ember); letter-spacing: 0.08em; }
+.gauge.pop strong { animation: pop 320ms ease-out; }
+
+.hud-tools { display: flex; gap: 0.35rem; }
+
+.icon-btn {
+  width: 2.2rem; height: 2.2rem;
+  display: grid; place-items: center;
+  font-size: 1rem;
+  color: var(--ink-dim);
+  background: #1d1613;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.icon-btn:hover { color: var(--ink); border-color: var(--amber-deep); }
+.icon-btn[aria-pressed="false"] { opacity: 0.45; }
+
+/* ------------------------------------------------------------ order rail */
+
+.rail-wrap { min-height: 7.4rem; position: relative; }
+
+.rail {
+  position: relative; /* containing block for tickets on their way out */
+  list-style: none;
+  margin: 0; padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.55rem;
+}
+
+.rail-empty {
+  margin: 0;
+  padding: 1.9rem 0;
+  text-align: center;
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+.ticket {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fdf6e9, #f2e5cf);
+  color: #3a2a1c;
+  border-radius: 10px;
+  padding: 0.5rem 0.5rem 1.05rem;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 0.25rem;
+  justify-items: center;
+  text-align: center;
+  animation: ticket-in 260ms cubic-bezier(.2,.9,.3,1.2);
+  /* torn-receipt bottom edge */
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 5px),
+    92% 100%, 84% calc(100% - 5px), 76% 100%, 68% calc(100% - 5px), 60% 100%,
+    52% calc(100% - 5px), 44% 100%, 36% calc(100% - 5px), 28% 100%,
+    20% calc(100% - 5px), 12% 100%, 4% calc(100% - 5px), 0 100%);
+}
+
+.ticket-dish { font-size: 1.5rem; line-height: 1; }
+.ticket-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.ticket-needs {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+
+/* Sits clear of the torn edge: `clip-path` on the card would cut a bar flush
+   with the bottom into the same teeth, and the patience read is the whole game. */
+.ticket-bar {
+  position: absolute;
+  left: 8px; right: 8px; bottom: 9px;
+  height: 5px;
+  border-radius: 999px;
+  background: #d3bfa0;
+  overflow: hidden;
+}
+.ticket-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  background: var(--mint);
+}
+.ticket[data-mood="warn"] .ticket-fill { background: var(--amber); }
+.ticket[data-mood="panic"] .ticket-fill { background: var(--ember); }
+.ticket[data-mood="panic"] { animation: jitter 420ms ease-in-out infinite; }
+.ticket.cookable { box-shadow: inset 0 0 0 2px var(--mint), var(--shadow); }
+/* A ticket animating away is lifted out of flow, so the ones still waiting
+   close the gap immediately instead of wrapping onto a second row. */
+.ticket.leaving {
+  position: absolute;
+  margin: 0;
+  pointer-events: none;
+  animation: ticket-out 240ms ease-in forwards;
+}
+
+/* -------------------------------------------------------------- the line */
+
+.line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: clamp(0.6rem, 1.6vw, 1rem);
+  align-items: stretch;
+}
+
+.pan-panel { display: flex; flex-direction: column; }
+
+.pan {
+  position: relative;
+  flex: 1;
+  min-height: 8.5rem;
+  display: grid;
+  place-content: center;
+  gap: 0.5rem;
+  border-radius: 999px / 46%;
+  background:
+    radial-gradient(90% 120% at 50% 0%, #3b2c26 0%, #1a1310 70%),
+    #16100e;
+  border: 1px solid #4a382f;
+  box-shadow: inset 0 6px 22px rgb(0 0 0 / 65%), inset 0 -2px 0 #513c32;
+  padding: 1rem;
+  text-align: center;
+  transition: box-shadow 180ms ease;
+}
+.pan[data-heat="hot"] { box-shadow: inset 0 6px 22px rgb(0 0 0 / 65%), 0 0 26px rgb(239 91 71 / 30%); }
+
+.pan-items {
+  list-style: none;
+  margin: 0; padding: 0;
+  display: flex;
+  gap: 0.4rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  min-height: 2.2rem;
+  align-items: center;
+}
+.pan-items li {
+  font-size: 1.85rem;
+  line-height: 1;
+  animation: drop-in 280ms cubic-bezier(.2,.9,.3,1.3);
+}
+.pan[data-cooking="true"] .pan-items li { animation: sizzle 620ms ease-in-out infinite alternate; }
+
+.pan-hint { margin: 0; font-size: 0.85rem; color: var(--ink-dim); min-height: 1.2em; }
+.pan-hint[data-kind="unknown"] { color: var(--ember); }
+.pan-hint[data-kind="ready"] { color: var(--mint); }
+
+.pan-actions {
+  margin-top: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.pass {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--amber);
+  background: rgb(240 160 75 / 12%);
+  border: 1px dashed var(--amber-deep);
+  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.55rem;
+}
+
+.ghost-btn {
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+  background: transparent;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+  margin-left: auto;
+}
+.ghost-btn:hover:not(:disabled) { color: var(--ink); border-color: var(--ember); }
+.ghost-btn:disabled { opacity: 0.35; cursor: default; }
+
+/* ------------------------------------------------------------- heat dial */
+
+.stove-panel { display: flex; flex-direction: column; }
+
+.dial { display: grid; gap: 0.3rem; }
+
+.dial-track {
+  position: relative;
+  height: 2.6rem;
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(90deg, #1b2a33 0%, #2c2320 42%, #4a2a20 74%, #6d2d1c 100%);
+  border: 1px solid var(--edge);
+  overflow: hidden;
+}
+
+.dial-band {
+  position: absolute;
+  top: 0; bottom: 0;
+  background: linear-gradient(180deg, rgb(108 196 143 / 55%), rgb(108 196 143 / 22%));
+  border-left: 2px solid var(--mint);
+  border-right: 2px solid var(--mint);
+  transition: none;
+}
+.dial-band.off { opacity: 0.35; filter: grayscale(0.5); }
+
+.dial-needle {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 4px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 55%), 0 0 10px rgb(255 255 255 / 70%);
+}
+.dial-needle.in-band { box-shadow: 0 0 0 1px rgb(0 0 0 / 55%), 0 0 14px 3px rgb(108 196 143 / 95%); }
+.dial-needle.too-hot { box-shadow: 0 0 0 1px rgb(0 0 0 / 55%), 0 0 14px 3px rgb(239 91 71 / 98%); }
+
+.dial-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.meters { display: grid; gap: 0.35rem; margin: 0.7rem 0; }
+.meter { display: grid; grid-template-columns: 3rem 1fr; align-items: center; gap: 0.5rem; }
+.meter-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.meter-track {
+  height: 0.55rem;
+  border-radius: 999px;
+  background: #1a1311;
+  border: 1px solid var(--edge);
+  overflow: hidden;
+}
+.meter-fill { height: 100%; width: 0%; border-radius: 999px; }
+.meter-sear .meter-fill { background: linear-gradient(90deg, var(--amber-deep), var(--amber)); }
+.meter-burn .meter-fill { background: linear-gradient(90deg, var(--char), var(--ember)); }
+
+.cook-btn {
+  margin-top: auto;
+  font: inherit;
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--amber-deep);
+  background: linear-gradient(180deg, #46301f, #2c1f16);
+  color: var(--ink);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: var(--tap);
+}
+.cook-btn-main { font-weight: 700; letter-spacing: 0.02em; }
+.cook-btn-sub { font-size: 0.68rem; color: var(--ink-faint); }
+.cook-btn:disabled { opacity: 0.4; cursor: default; box-shadow: none; }
+.cook-btn.on {
+  background: linear-gradient(180deg, var(--ember), #b53c2c);
+  border-color: var(--ember);
+  transform: translateY(2px);
+  box-shadow: none;
+}
+.cook-btn.on .cook-btn-sub { color: rgb(255 255 255 / 78%); }
+.cook-btn.on kbd { background: rgb(0 0 0 / 35%); color: #fff; border-color: rgb(255 255 255 / 35%); }
+
+/* ----------------------------------------------------------------- shelf */
+
+.shelf {
+  list-style: none;
+  margin: 0; padding: 0;
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.shelf-btn {
+  width: 100%;
+  font: inherit;
+  display: grid;
+  justify-items: center;
+  gap: 0.1rem;
+  padding: 0.5rem 0.2rem 0.35rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--edge);
+  background: linear-gradient(180deg, var(--panel-hi), var(--panel));
+  color: var(--ink-dim);
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow: var(--tap);
+  transition: transform 90ms ease, border-color 140ms ease;
+}
+.shelf-btn:hover:not(:disabled) { border-color: var(--amber-deep); color: var(--ink); }
+.shelf-btn:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+.shelf-btn:disabled { opacity: 0.35; cursor: default; }
+.shelf-btn.wanted { border-color: var(--mint); }
+.shelf-emoji { font-size: 1.5rem; line-height: 1; }
+.shelf-name { font-size: 0.6rem; letter-spacing: 0.02em; }
+.shelf-key {
+  font-size: 0.55rem;
+  color: var(--ink-faint);
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  padding: 0 0.25rem;
+}
+
+.footnote {
+  margin: 0;
+  text-align: center;
+  font-size: 0.76rem;
+  color: var(--ink-faint);
+}
+
+/* ---------------------------------------------------------------- toasts */
+
+/* Feedback rises out of the pan itself — the one place it cannot cover a
+   control the player is in the middle of using. */
+.toasts {
+  position: absolute;
+  left: 50%;
+  bottom: 0.35rem;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 100%;
+  display: grid;
+  gap: 0.25rem;
+  justify-items: center;
+  pointer-events: none;
+  z-index: 8;
+}
+
+.toast {
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #2a201c;
+  border: 1px solid var(--edge);
+  box-shadow: var(--shadow);
+  animation: toast 1900ms ease-out forwards;
+}
+.toast[data-tone="good"] { color: var(--mint); border-color: rgb(108 196 143 / 45%); }
+.toast[data-tone="great"] { color: #ffe08a; border-color: rgb(255 224 138 / 45%); }
+.toast[data-tone="bad"] { color: var(--ember); border-color: rgb(239 91 71 / 45%); }
+
+/* --------------------------------------------------------------- overlay */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(10 7 6 / 78%);
+  backdrop-filter: blur(6px);
+  z-index: 12;
+}
+
+.card {
+  width: min(30rem, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, var(--panel-hi), var(--panel));
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  padding: clamp(1.1rem, 4vw, 1.8rem);
+  box-shadow: var(--shadow);
+  text-align: center;
+  animation: card-in 240ms cubic-bezier(.2,.9,.3,1.15);
+}
+.card h2 { margin: 0 0 0.7rem; font-size: clamp(1.3rem, 5vw, 1.8rem); }
+.card-body { color: var(--ink-dim); font-size: 0.92rem; }
+.card-body p { margin: 0 0 0.7rem; }
+.card-body ul { margin: 0 0 0.9rem; padding-left: 1.1rem; text-align: left; }
+.card-body li { margin-bottom: 0.3rem; }
+.card-body strong { color: var(--ink); }
+
+.tally {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+}
+.tally li {
+  background: #1d1613;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem;
+}
+.tally b { display: block; font-size: 1.15rem; color: var(--ink); }
+.tally span { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); }
+
+.primary-btn {
+  font: inherit;
+  font-weight: 700;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: linear-gradient(180deg, var(--amber), var(--amber-deep));
+  color: #241a10;
+  cursor: pointer;
+  box-shadow: var(--tap);
+}
+.primary-btn:hover { filter: brightness(1.06); }
+.primary-btn:active { transform: translateY(2px); box-shadow: none; }
+
+.card-foot { margin: 0.7rem 0 0; font-size: 0.75rem; color: var(--ink-faint); }
+
+:where(button, a, [tabindex]):focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------ animations */
+
+@keyframes pop { from { transform: scale(1.35); color: var(--amber); } to { transform: scale(1); } }
+@keyframes drop-in { from { transform: translateY(-14px) scale(0.7); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes sizzle { from { transform: translateY(0) rotate(-2deg); } to { transform: translateY(-3px) rotate(2deg); } }
+@keyframes ticket-in { from { transform: translateY(-18px) rotate(-3deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes ticket-out { to { transform: translateY(14px) scale(0.88); opacity: 0; } }
+@keyframes jitter { 0%, 100% { transform: rotate(-0.8deg); } 50% { transform: rotate(0.8deg); } }
+@keyframes toast { 0% { transform: translateY(10px); opacity: 0; } 12%, 72% { transform: none; opacity: 1; } 100% { transform: translateY(-14px); opacity: 0; } }
+@keyframes card-in { from { transform: translateY(12px) scale(0.97); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ------------------------------------------------------------ responsive */
+
+/* A real-time game must not ask anyone to scroll: everything below keeps the
+   whole kitchen inside one phone screen. */
+@media (max-width: 720px) {
+  .app { gap: 0.5rem; }
+  .panel { padding: 0.6rem; }
+  .line { grid-template-columns: 1fr; }
+  .footnote { display: none; }
+
+  .hud { gap: 0.45rem; flex-wrap: nowrap; }
+  .brand { font-size: 1rem; }
+  .gauges { margin-left: auto; gap: 0.3rem; }
+  .gauge { min-width: 2.7rem; padding: 0.15rem 0.3rem; }
+  .gauge-label { font-size: 0.5rem; letter-spacing: 0.07em; }
+  .gauge strong { font-size: 0.92rem; }
+  .icon-btn { width: 1.9rem; height: 1.9rem; font-size: 0.85rem; }
+
+  .rail-wrap { min-height: 0; }
+  .rail { gap: 0.35rem; }
+  .ticket { padding: 0.35rem 0.2rem 0.8rem; gap: 0.12rem; }
+  .ticket-dish { font-size: 1.15rem; }
+  .ticket-name { font-size: 0.58rem; }
+  .ticket-needs { font-size: 0.62rem; letter-spacing: 0; }
+  .ticket-bar { left: 5px; right: 5px; bottom: 8px; height: 4px; }
+
+  .pan { min-height: 5.4rem; padding: 0.6rem; }
+  .pan-items li { font-size: 1.6rem; }
+  .meters { margin: 0.5rem 0; }
+
+  .shelf { grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 0.25rem; }
+  .shelf-name, .shelf-key { display: none; }
+  .shelf-btn { padding: 0.45rem 0.1rem; }
+  .shelf-emoji { font-size: 1.35rem; }
+
+  .cook-btn { padding: 0.85rem; }
+}
+
+@media (max-width: 480px) {
+  .brand-text { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .toast { animation: none; opacity: 1; }
+}
