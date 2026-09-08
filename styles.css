@@ -258,12 +258,12 @@ kbd {
 
 .line {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
   gap: clamp(0.6rem, 1.6vw, 1rem);
   align-items: stretch;
 }
 
-.pan-panel { display: flex; flex-direction: column; }
+.pan-panel { position: relative; display: flex; flex-direction: column; }
 
 .pan {
   position: relative;
@@ -280,9 +280,61 @@ kbd {
   box-shadow: inset 0 6px 22px rgb(0 0 0 / 65%), inset 0 -2px 0 #513c32;
   padding: 1rem;
   text-align: center;
+  overflow: hidden;
   transition: box-shadow 180ms ease;
 }
 .pan[data-heat="hot"] { box-shadow: inset 0 6px 22px rgb(0 0 0 / 65%), 0 0 26px rgb(239 91 71 / 30%); }
+
+/* --- with WebGL: a window onto the real kitchen ------------------------- */
+
+.stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  border-radius: inherit;
+}
+
+.pan.is-3d {
+  min-height: 13rem;
+  border-radius: var(--radius);
+  background: #140f0d;
+  border-color: #33251f;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 40%), var(--shadow);
+  padding: 0;
+  align-content: end;
+  justify-items: stretch;
+}
+.pan.is-3d .stage { display: block; }
+.pan.is-3d[data-heat="hot"] { box-shadow: inset 0 0 0 1px rgb(0 0 0 / 40%), 0 0 30px rgb(239 91 71 / 26%); }
+
+/* The dish is unmistakable in 3D, but which *ingredients* are in the pan has
+   to stay unambiguous — so the emoji readout survives as a corner legend. */
+.pan.is-3d .pan-items {
+  position: absolute;
+  top: 0.45rem;
+  left: 0.45rem;
+  z-index: 2;
+  min-height: 0;
+  gap: 0.2rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 999px;
+  background: rgb(10 7 6 / 55%);
+  backdrop-filter: blur(3px);
+}
+.pan.is-3d .pan-items:empty { display: none; }
+.pan.is-3d .pan-items li { font-size: 1rem; }
+
+.pan.is-3d .pan-hint {
+  position: relative;
+  z-index: 2;
+  margin: 0;
+  padding: 0.45rem 0.6rem;
+  background: linear-gradient(180deg, transparent, rgb(10 7 6 / 78%) 45%);
+  text-shadow: 0 1px 3px rgb(0 0 0 / 80%);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
 
 .pan-items {
   list-style: none;
@@ -486,10 +538,10 @@ kbd {
 .toasts {
   position: absolute;
   left: 50%;
-  bottom: 0.35rem;
+  bottom: 3.1rem;
   transform: translateX(-50%);
   width: max-content;
-  max-width: 100%;
+  max-width: calc(100% - 1rem);
   display: grid;
   gap: 0.25rem;
   justify-items: center;
@@ -624,6 +676,10 @@ kbd {
   .ticket-bar { left: 5px; right: 5px; bottom: 8px; height: 4px; }
 
   .pan { min-height: 5.4rem; padding: 0.6rem; }
+  .pan.is-3d { min-height: 8.2rem; padding: 0; }
+  .pan.is-3d .pan-items li { font-size: 0.85rem; }
+  .pan.is-3d .pan-hint { padding: 0.35rem 0.5rem; font-size: 0.78rem; }
+  .toasts { bottom: 2.7rem; }
   .pan-items li { font-size: 1.6rem; }
   .meters { margin: 0.5rem 0; }
 

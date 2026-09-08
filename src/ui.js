@@ -3,6 +3,7 @@
 
 import { act, createGame, panBand, panStatus, takeEvents, update } from './engine.js';
 import { INGREDIENTS, INGREDIENT_BY_ID, RECIPE_BY_ID } from './recipes.js';
+import { createKitchen } from './scene.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -15,6 +16,7 @@ const el = {
   rail: $('rail'),
   railEmpty: $('rail-empty'),
   pan: $('pan'),
+  stage: $('stage'),
   panItems: $('pan-items'),
   panStatus: $('pan-status'),
   pass: $('pass'),
@@ -628,6 +630,35 @@ function handleEvents(events) {
 
 // -------------------------------------------------------------- game loop
 
+// --------------------------------------------------------- the 3D kitchen
+//
+// Purely presentational: it reads engine state and renders it. If three.js or
+// WebGL is unavailable it stays null for the whole session and the flat pan
+// underneath carries on doing the job.
+
+let kitchen = null;
+
+function fitKitchen() {
+  if (!kitchen) return;
+  const box = el.stage.getBoundingClientRect();
+  kitchen.resize(box.width, box.height);
+}
+
+createKitchen(el.stage).then((made) => {
+  if (!made) return;
+  kitchen = made;
+  el.pan.classList.add('is-3d');
+  fitKitchen();
+}).catch(() => {
+  /* stay flat */
+});
+
+if (typeof ResizeObserver === 'function') {
+  new ResizeObserver(fitKitchen).observe(el.pan);
+} else {
+  window.addEventListener('resize', fitKitchen);
+}
+
 const FIXED_DT = 1 / 120;
 const MAX_FRAME_DT = 0.25;
 const MAX_STEPS = 60;
@@ -665,6 +696,7 @@ function frame(now) {
   }
 
   render();
+  if (kitchen) kitchen.sync(state, now, dt);
   sweepToasts(now);
 }
 
@@ -673,11 +705,26 @@ window.skilletRush = {
   state,
   act: (action) => act(state, action),
   step(seconds, dt = FIXED_DT) {
-    for (let t = 0; t < seconds; t += dt) update(state, dt);
+    // Drives the scene from a virtual wall clock as well, so the particle
+    // systems -- which expire on time, not on frames -- advance in step with
+    // the simulation even where no animation frames are being delivered.
+    let clock = performance.now();
+    let lastDraw = clock;
+    for (let t = 0; t < seconds; t += dt) {
+      update(state, dt);
+      clock += dt * 1000;
+      if (kitchen && clock - lastDraw >= 16) {
+        kitchen.sync(state, clock, (clock - lastDraw) / 1000);
+        lastDraw = clock;
+      }
+    }
     handleEvents(takeEvents(state));
     render();
+    if (kitchen) kitchen.sync(state, clock, 1 / 60);
   },
   get records() { return { ...records }; },
+  get is3D() { return !!kitchen; },
+  get sceneStats() { return kitchen ? kitchen.stats() : null; },
 };
 
 setMuted(false);

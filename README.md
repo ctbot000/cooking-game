@@ -1,7 +1,8 @@
 # 🍳 Skillet Rush
 
-A short, sharp cooking game that runs in the browser. No build step, no
-dependencies, no assets — one HTML file, one stylesheet, three ES modules.
+A short, sharp cooking game that runs in the browser, with a 3D skillet you
+cook in. No build step, no bundler, no image or model assets — one HTML file,
+one stylesheet, four ES modules.
 
 **▶️ [Play it](https://ctbot000.github.io/cooking-game/)**
 
@@ -13,7 +14,8 @@ You are the whole kitchen. Orders land on the rail, you have one pan.
    order you add things in does not matter; the exact set does.
 2. **Ride the heat.** Hold <kbd>Space</kbd> to raise the needle, release to let
    it fall, and keep it inside the green band — which drifts, so parking on one
-   heat setting never works.
+   heat setting never works. The pan tells you the same story: flames climb the
+   sides, the iron starts glowing, the food browns, then blackens and smokes.
 3. **Watch the char.** Above the band the dish burns, and it burns *faster* the
    longer you have been cooking and the closer you are to done. Below the band
    nothing happens at all, and the customer is still waiting.
@@ -25,6 +27,23 @@ tempers, and a narrower band.
 Also: <kbd>⌫</kbd> clears a mistake, <kbd>Esc</kbd> pauses, <kbd>M</kbd> mutes.
 It plays with a mouse or a thumb too — the whole kitchen fits on a phone screen
 without scrolling.
+
+## Rendering
+
+The kitchen is real 3D — a WebGL skillet on a lit burner, with the ingredients
+as solid objects that drop in, jostle as they sizzle, brown, char, and get
+flipped out towards the plates when the dish goes to the pass.
+
+What is *not* 3D is deliberate. The heat band is a precision tracking task, and
+the tickets are read under time pressure; both stay as flat, high-contrast HUD.
+Putting a skill-critical readout in perspective costs accuracy and returns only
+decoration.
+
+three.js is fetched at runtime from a CDN (pinned to r160, ~670 KB, one file).
+It is the game's only dependency and it is optional: if the CDN is blocked, the
+device has no WebGL, or the fetch simply fails, `createKitchen` resolves to null
+and the original flat pan carries on with no other change. Nothing outside
+`src/scene.js` knows which one is running.
 
 ## Design notes
 
@@ -67,13 +86,15 @@ index.html        markup and the shell
 styles.css        the whole look
 src/recipes.js    ingredients, dishes, difficulty tiers  (pure data)
 src/engine.js     rules, scoring, the simulation         (no DOM, no timers)
-src/ui.js         rendering, input, sound                (no rules)
+src/ui.js         HUD, input, sound                      (no rules)
+src/scene.js      the 3D kitchen                         (reads state, never writes)
 test/             the engine suite and simulated players
 ```
 
 `engine.js` never touches the browser: the caller owns the clock, so the same
 code runs under `node --test` and behind `requestAnimationFrame`. That split is
-what makes the balance numbers above measurable at all.
+what makes the balance numbers above measurable at all — and it is why adding a
+WebGL renderer changed no rule and broke no test.
 
 ## Running it locally
 

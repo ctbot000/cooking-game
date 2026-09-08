@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Skillet Rush — a cooking game</title>
-<meta name="description" content="Read the tickets, build the dish, ride the heat band. A short, sharp cooking game that runs in your browser.">
+<meta name="description" content="Read the tickets, build the dish, ride the heat band. A short, sharp cooking game with a 3D skillet, in your browser.">
 <meta name="theme-color" content="#16110f">
 <meta property="og:title" content="Skillet Rush">
-<meta property="og:description" content="Read the tickets, build the dish, ride the heat band.">
+<meta property="og:description" content="Read the tickets, build the dish, ride the heat band. Now with a 3D skillet.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%B3%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles.css">
@@ -43,10 +43,11 @@
     <div class="panel pan-panel">
       <h2 class="panel-title">The&nbsp;pan</h2>
       <div class="pan" id="pan">
+        <canvas class="stage" id="stage" aria-hidden="true"></canvas>
         <ul class="pan-items" id="pan-items" aria-label="Ingredients in the pan"></ul>
         <p class="pan-hint" id="pan-status">Pick ingredients to start a dish</p>
-        <div class="toasts" id="toasts" aria-hidden="true"></div>
       </div>
+      <div class="toasts" id="toasts" aria-hidden="true"></div>
       <div class="pan-actions">
         <p class="pass" id="pass" hidden></p>
         <button type="button" class="ghost-btn" id="btn-trash">Clear pan <kbd>⌫</kbd></button>
